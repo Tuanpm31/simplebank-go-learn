@@ -6,16 +6,16 @@ import (
 	"log"
 	"simplebank/api"
 	db "simplebank/db/sqlc"
-)
-
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
+	"simplebank/util"
 )
 
 func main() {
-	DB, err := sql.Open(dbDriver, dbSource)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load configuration", err)
+	}
+
+	DB, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to the database", err)
 	}
@@ -23,7 +23,7 @@ func main() {
 
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start  server", err)
 	}
